@@ -1,3 +1,10 @@
+"""
+TimelineSubWindow Plugin - Hook Implementations
+
+Displays timeline data in a table view with search filtering.
+Supports HTML rendering for entity-annotated text (highlighted entities).
+"""
+
 import TimelineSubWindow
 from PyQt5.QtWidgets import (
     QMdiSubWindow,
@@ -5,10 +12,57 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QLineEdit,
     QTableView,
-    QLabel
+    QLabel,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
+    QApplication,
+    QStyle
 )
 from PyQt5.QtSql import QSqlTableModel
+from PyQt5.QtGui import QTextDocument, QAbstractTextDocumentLayout, QPalette
+from PyQt5.QtCore import QSize, Qt, QRectF
 from PyQt5 import QtGui
+
+
+class HTMLDelegate(QStyledItemDelegate):
+    """
+    Custom delegate that renders HTML content in QTableView cells.
+    
+    This enables entity recognition highlights (yellow background,
+    bold text with subscript labels) to be displayed properly.
+    """
+
+    def paint(self, painter, option, index):
+        """Paint the cell with HTML rendering."""
+        options = QStyleOptionViewItem(option)
+        self.initStyleOption(options, index)
+
+        painter.save()
+
+        doc = QTextDocument()
+        doc.setHtml(options.text)
+        doc.setTextWidth(options.rect.width())
+
+        options.text = ""
+        style = QApplication.style()
+        style.drawControl(QStyle.CE_ItemViewItem, options, painter)
+
+        painter.translate(options.rect.left(), options.rect.top())
+        clip = QRectF(0, 0, float(options.rect.width()), float(options.rect.height()))
+        doc.drawContents(painter, clip)
+
+        painter.restore()
+
+    def sizeHint(self, option, index):
+        """Calculate the size hint based on HTML content."""
+        options = QStyleOptionViewItem(option)
+        self.initStyleOption(options, index)
+
+        doc = QTextDocument()
+        doc.setHtml(options.text)
+        doc.setTextWidth(options.rect.width() if options.rect.width() > 0 else 300)
+
+        return QSize(int(doc.idealWidth()), int(doc.size().height()))
 
 
 @TimelineSubWindow.hookimpl
@@ -38,6 +92,10 @@ def show_ui(TimeLineSubWindowObj):
     table_label.setText('Merged timeline:')
     table_widget = QTableView()
     table_widget.setModel(TimeLineSubWindowObj.table_model)
+
+    # Add HTML delegate to render entity highlights
+    html_delegate = HTMLDelegate()
+    table_widget.setItemDelegate(html_delegate)
 
     # search event
     search.textChanged.connect(TimeLineSubWindowObj.update_filter)

@@ -213,6 +213,16 @@ def merge_button_clicked(MergeTimelineSubWindowObj):
         # insert into (new) table merged timeline
         MergeTimelineSubWindowObj.database.insert_into_merged_timeline(selected_columns, MergeTimelineSubWindowObj.merged_timeline_table_name)
 
+        # Auto-save merged timeline to Saved Timeline
+        try:
+            from DtGUI_SavedTimeline.saved_timeline import SavedTimelineManager
+            manager = SavedTimelineManager()
+            # Get case directory from database name
+            case_directory = MergeTimelineSubWindowObj.database.database_name.replace('.db', '')
+            manager.save_timeline(case_directory, MergeTimelineSubWindowObj.merged_timeline_table_name, ['timestamp', 'event', 'source'])
+        except ImportError:
+            pass  # SavedTimeline plugin not installed
+
         # show info dialog: Merge timelines is successful. You can access the file: case_name_merged_timelines.csv
         MergeTimelineSubWindowObj.show_info_messagebox("Merge timelines is successful.")
 

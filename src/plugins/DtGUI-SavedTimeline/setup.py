@@ -1,21 +1,21 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="dronetimeline-QtDatabase",
+    name="dronetimeline-DtGUI-SavedTimeline",
     version="1.0.0",
-    description="DroneTimeline QtDatabase - SQLite database plugin for timeline data",
-    long_description="QtDatabase plugin for DroneTimeline, providing SQLite database operations for storing and querying forensic timeline data.",
+    description="DroneTimeline Saved Timeline Plugin - Quick access to previously imported timelines",
+    long_description="Saved Timeline plugin for DroneTimeline, providing persistent storage and quick access to previously imported forensic timelines.",
     long_description_content_type="text/plain",
     author="Hudan Studiawan",
     author_email="hudan@if.its.ac.id",
     url="https://github.com/studiawan/dronetimeline",
     packages=find_packages(),
     entry_points={
-        "console_scripts": ["QtDatabase = QtDatabase.host:main"]
+        "DtGUI": ["savedtimeline = DtGUI_SavedTimeline.plugin_hooks"],
     },
     install_requires=[
-        "pluggy",
-        "PyQt5"
+        "dronetimeline-DtGUI",
+        "dronetimeline-QtDatabase",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
