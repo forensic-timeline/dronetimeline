@@ -1,0 +1,4 @@
+sphinx
+pluggy
+PyQt5
+spacy
